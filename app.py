@@ -1,39 +1,47 @@
 import pandas as pd
 import streamlit as st
+from create import create
+from delete import delete
 
-st.set_page_config(layout="wide")
-
+st.set_page_config(layout="wide", page_title="Data manager", page_icon=":material/edit:")
 st.title("Planilhas Teste")
-st.sidebar.title("Teste")
 
-file_path = "Painel_dezembro.xlsm"
-data = pd.read_excel(file_path, engine="openpyxl")
+def build_sidebar():
+    st.sidebar.title("Menu Principal")
+    page = st.sidebar.selectbox("Selecione a Página", ["Create", "Delete"])
+    return page
 
-col1, col2, col3, col4, col5, col6 = st.columns(6)
-
-with col1:
-    dado1 = st.text_input(label="Dado1:")
-with col2:
-    dado2 = st.text_input(label="Dado2:")
-with col3:
-    dado3 = st.text_input(label="Dado3:")
-with col4:
-    dado4 = st.text_input(label="Dado4:")
-with col5:
-    dado5 = st.text_input(label="Dado5:")
-with col6:
-    dado6 = st.text_input(label="Dado6:")
-
-if st.button("salvar"):
+def build_main(page):
+    file_path = "banco.xlsx"
+    data = pd.read_excel(file_path, engine="openpyxl")
     
-    new_row = pd.DataFrame([[dado1, dado2, dado3, dado4, dado5, dado6]], columns=data.columns)
+    colunas = st.columns(11)
+    dados = {}
 
-    data = pd.concat([data, new_row], ignore_index=True)
+    for i, col in enumerate(colunas, start=1):
+        with col:
+            dados[f"dado{i}"] = st.text_input(label=f"Dado{i}:")
 
-    with pd.ExcelWriter(file_path, engine="openpyxl", mode="w") as writer:
-        data.to_excel(writer, index=False)
+    if st.button("Salvar"):
+        new_row = pd.DataFrame([[dados[f"dado{i}"] for i in range(1, 12)]], columns=data.columns)
+        data = pd.concat([data, new_row], ignore_index=True)
 
-    st.success("Planilha atualizada com sucesso")
+        with pd.ExcelWriter(file_path, engine="openpyxl", mode="w") as writer:
+            data.to_excel(writer, index=False)
 
-st.write("Planilha Atualizada:")
-st.dataframe(data)
+        st.success("Planilha atualizada com sucesso!")
+        
+        st.rerun()
+
+    st.write("Planilha Atualizada:")
+    st.dataframe(data)
+
+    if page == "Create":
+        create()
+    elif page == "Delete":
+        delete()
+    else:
+        st.error("Página não encontrada.")
+
+page = build_sidebar()
+build_main(page)
