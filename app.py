@@ -4,7 +4,7 @@ from create import create
 from delete import delete
 from datetime import datetime
 
-st.set_page_config(layout="wide", page_title="Data manager", page_icon=":material/edit:")
+st.set_page_config(layout="wide", page_title="Dashboard Python", page_icon=":material/edit:")
 st.title("Planilhas Teste")
 
 def build_sidebar():
@@ -13,7 +13,7 @@ def build_sidebar():
     return page
 
 def build_main(page):
-    file_path = "TESTE.xlsx"
+    file_path = "banco_de_dados.xlsx"
     data = pd.read_excel(file_path, engine="openpyxl")
 
     colunas = st.columns(3)
@@ -24,8 +24,13 @@ def build_main(page):
             dados[col_name] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             continue 
 
-        #if i == 7:
-            #continue  
+        if i == 7:
+            dados[col_name] = "em dia" 
+            continue  
+        
+        if i == 8:
+            dados[col_name] = "em aberto"
+            continue
 
         with colunas[i % 3]:
             dados[col_name] = st.text_input(label=col_name)
